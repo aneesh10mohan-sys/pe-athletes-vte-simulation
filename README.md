@@ -1,5 +1,7 @@
 # Exercise-Associated VTE Risk: A Mechanistic Simulation
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24517304.svg)](https://doi.org/10.5281/zenodo.24517304)
+
 Companion code for **"Pulmonary Embolism in Athletes: A Review and Simulation Study of the Thrombotic Risks of Intense Exercise"** by Aneesh A. Mohan.
 
 The model turns the paper's hypotheses into numbers. It simulates a year of exercise sessions for synthetic sedentary, moderate and intense-endurance adults aged 18–50. Each session raises that day's clot risk through four pathways mapped to Virchow's triad:
@@ -62,4 +64,4 @@ The research question, literature review, Virchow's triad framework and hypothes
 
 ## Citation
 
-See `CITATION.cff`. License: MIT (see `LICENSE`).
+Archived on Zenodo: https://doi.org/10.5281/zenodo.24517304. See `CITATION.cff`. License: MIT (see `LICENSE`).
