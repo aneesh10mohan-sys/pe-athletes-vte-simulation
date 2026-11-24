@@ -1,0 +1,101 @@
+{
+  "config": {
+    "reps": 250,
+    "n": 4000,
+    "seed": 2026,
+    "out": "results"
+  },
+  "risk_per100k_median_95UI": {
+    "sedentary": [
+      30.09309733153821,
+      18.50358967892243,
+      42.61380426614728
+    ],
+    "moderate": [
+      21.08275614667911,
+      12.588128842619597,
+      30.774550532739163
+    ],
+    "intense": [
+      27.3852474946461,
+      15.456140039452771,
+      47.68562055614202
+    ]
+  },
+  "IRR_int_mod": [
+    1.3110303086415263,
+    0.9448963843858315,
+    1.8878678042999972
+  ],
+  "IRR_int_sed": [
+    0.919438517369813,
+    0.6146848460877141,
+    1.3704902435012336
+  ],
+  "IRR_int_mod_if_no_acute_effects": [
+    0.8415810537881986,
+    0.707736027220732,
+    0.9501970183909155
+  ],
+  "excess_share_median": {
+    "hct": 0.08426001150488738,
+    "coag": 0.41494511009454904,
+    "stasis": 0.11742519871509438,
+    "micro": 0.528713585135274,
+    "syn": 0.14039039968885947
+  },
+  "scenarios_intense_risk_median": {
+    "baseline": 27.3852474946461,
+    "hydration": 26.520829127870158,
+    "active_recovery": 25.80182608909432,
+    "no_travel_sitting": 26.712160230677938,
+    "combined": 24.718582364975703
+  },
+  "scenarios_reduction_vs_baseline_median": {
+    "baseline": 0.0,
+    "hydration": 0.032281818496811276,
+    "active_recovery": 0.05738350001190634,
+    "no_travel_sitting": 0.028045499993266165,
+    "combined": 0.0983093885065881
+  },
+  "hypotheses": {
+    "H1 (intense vs moderate risk >1)": [
+      "SUPPORTED",
+      0.952
+    ],
+    "H1b (intense vs sedentary risk >1)": [
+      "INCONCLUSIVE",
+      0.324
+    ],
+    "H2 (all 3 triad arms each >=10% of excess)": [
+      "INCONCLUSIVE",
+      0.684
+    ],
+    "H3 (3% dehydration raises day-risk >=10%)": [
+      "INCONCLUSIVE",
+      1.0562158157200756
+    ],
+    "H4 (4h extra immobility raises day-risk >=10%)": [
+      "SUPPORTED",
+      1.3937528485125166
+    ],
+    "H5 (marathon load raises day-risk >=10%)": [
+      "SUPPORTED",
+      1.4190675485932571
+    ]
+  },
+  "sensitivity_top": {
+    "p_beta_micro": 0.8791072756074705,
+    "p_beta_coag": 0.8244637354095539,
+    "p_rr_fit_extra": 0.8100841351999872,
+    "p_tau_coag_h": 0.6848127702042175,
+    "p_tau_micro_d": 0.6633113300213737,
+    "p_beta_syn": 0.46023903854453396
+  },
+  "person_years_per_group_for_80pct_power": 956635.9076417013,
+  "sim_cases_per_cohort_median": {
+    "sedentary": 1.0,
+    "moderate": 1.0,
+    "intense": 1.0
+  }
+}

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Athlete Blood Clot Risk Simulator v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Layout: two-column lab-instrument layout, inputs left, readout right; stacks on phones */
+  --bg: #f4f6f7;
+  --panel: #ffffff;
+  --ink: #14212b;
+  --ink-2: #4f5d67;
+  --line: #d9e0e4;
+  --accent: #0f6a8b;
+  --accent-soft: #e2f0f5;
+  --warn-bg: #fff4e5;
+  --warn-ink: #7a4300;
+  --crit-bg: #fdecec;
+  --crit-ink: #8f1d1d;
+  --bar-muted: #b8c4cb;
+  --font-display: "IBM Plex Serif", Georgia, serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f171c; --panel: #16222a; --ink: #e6edf1; --ink-2: #a3b2bb; --line: #2a3a44;
+    --accent: #5bb6d6; --accent-soft: #173341; --warn-bg: #3a2a12; --warn-ink: #f3c98a;
+    --crit-bg: #3d1a1a; --crit-ink: #f5b0b0; --bar-muted: #4a5b66; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f171c; --panel: #16222a; --ink: #e6edf1; --ink-2: #a3b2bb; --line: #2a3a44;
+  --accent: #5bb6d6; --accent-soft: #173341; --warn-bg: #3a2a12; --warn-ink: #f3c98a;
+  --crit-bg: #3d1a1a; --crit-ink: #f5b0b0; --bar-muted: #4a5b66; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-body); }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 24px 20px 48px; display: grid; gap: 20px; }
+header h1 { font-family: var(--font-display); font-weight: 600; font-size: 28px; line-height: 1.2; margin: 0 0 6px; text-wrap: balance; }
+header p { margin: 0; color: var(--ink-2); max-width: 70ch; }
+.notice { display: grid; gap: 8px; grid-template-columns: 1fr 1fr; }
+.note { border-radius: 8px; padding: 12px 14px; font-size: 14px; }
+.note strong { display: block; margin-bottom: 2px; }
+.note.warn { background: var(--warn-bg); color: var(--warn-ink); }
+.note.crit { background: var(--crit-bg); color: var(--crit-ink); }
+.main { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px 18px 20px; display: grid; gap: 18px; }
+fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 12px; }
+legend { font-family: var(--font-display); font-weight: 600; font-size: 17px; padding: 0; margin-bottom: 10px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+label { display: grid; gap: 4px; font-size: 13px; color: var(--ink-2); font-weight: 500; }
+.hint { font-weight: 400; font-size: 12px; }
+input[type=number], select {
+  font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px;
+  padding: 7px 9px; width: 100%; font-variant-numeric: tabular-nums;
+}
+input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.check { display: flex; gap: 8px; align-items: center; color: var(--ink); font-size: 14px; font-weight: 400; }
+.check input { width: 17px; height: 17px; accent-color: var(--accent); }
+.range { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
+.range input { accent-color: var(--accent); width: 100%; }
+.range output { font-family: var(--font-mono); font-size: 13px; color: var(--ink); min-width: 4ch; text-align: right; }
+.result { position: sticky; top: 16px; }
+.kicker { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); font-weight: 600; }
+.big { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.big .num { font-family: var(--font-display); font-size: 48px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+.big .unit { color: var(--ink-2); }
+.sub { color: var(--ink-2); font-size: 14px; margin: 4px 0 0; }
+.sub b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+h3 { font-family: var(--font-display); font-size: 16px; font-weight: 600; margin: 0 0 8px; }
+.bars { display: grid; gap: 8px; }
+.bar { display: grid; grid-template-columns: 11.5em 1fr 4.6em; gap: 10px; align-items: center; font-size: 13px; }
+.bar .track { height: 12px; background: var(--bg); border-radius: 3px; position: relative; overflow: hidden; }
+.bar .fill { position: absolute; inset: 0 auto 0 0; background: var(--bar-muted); border-radius: 0 3px 3px 0; }
+.bar.you .fill { background: var(--accent); }
+.bar.you { font-weight: 600; }
+.bar .val { font-family: var(--font-mono); text-align: right; font-variant-numeric: tabular-nums; }
+.levers { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 14px; }
+.levers li { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); padding: 6px 0; }
+.levers li span:last-child { font-family: var(--font-mono); white-space: nowrap; }
+.blocked { display: none; }
+.is-blocked .blocked { display: block; }
+.is-blocked .readout { display: none; }
+footer { color: var(--ink-2); font-size: 13px; max-width: 80ch; display: grid; gap: 6px; }
+footer p { margin: 0; }
+@media (max-width: 820px) {
+  .main, .notice { grid-template-columns: 1fr; }
+  .result { position: static; }
+}
+@media (max-width: 420px) {
+  .grid2 { grid-template-columns: 1fr; }
+  .bar { grid-template-columns: 8.5em 1fr 4.2em; }
+  .big .num { font-size: 40px; }
+}
+@media (prefers-reduced-motion: no-preference) { .bar .fill { transition: width .25s ease; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Athlete Blood Clot Risk Simulator</h1>
+    <p>Estimates the chance of developing a blood clot (deep vein thrombosis or pulmonary embolism) over the next 12 months, based on how you train. It uses the simulation model from <i>Pulmonary Embolism in Athletes: Evaluating the Thrombotic Risks of Intense Exercise</i> (A. Mohan).</p>
+  </header>
+
+  <div class="notice">
+    <div class="note warn"><strong>Research model, not a medical test.</strong>Some inputs are fitted to published studies, but others are still assumptions, and the model has not been checked against real patient outcomes. Do not use it to diagnose or make treatment decisions.</div>
+    <div class="note crit"><strong>Symptoms now? Get care now.</strong>Leg swelling or pain, sudden shortness of breath, chest pain, or coughing up blood need emergency care. Call your local emergency number.</div>
+  </div>
+
+  <div class="main">
+    <form class="panel" id="form" novalidate>
+      <fieldset>
+        <legend>About you</legend>
+        <div class="grid2">
+          <label for="age">Age (years)<input type="number" id="age" min="16" max="80" value="35"></label>
+          <label for="sex">Sex<select id="sex"><option value="male">Male</option><option value="female">Female</option></select></label>
+          <label for="units">Units<select id="units"><option value="metric">kg / cm</option><option value="imperial">lb / inches</option></select></label>
+          <span></span>
+          <label for="weight"><span id="weightLabel">Weight (kg)</span><input type="number" id="weight" min="30" max="400" value="72"></label>
+          <label for="height"><span id="heightLabel">Height (cm)</span><input type="number" id="height" min="50" max="230" value="177"></label>
+          <label for="hct">Hematocrit (%) <span class="hint">optional; from a blood test</span><input type="number" id="hct" min="30" max="60" step="0.5" placeholder="typical value used"></label>
+          <label for="fvl">Factor V Leiden <span class="hint">inherited clotting gene</span><select id="fvl"><option value="no">No / not tested</option><option value="yes">Yes</option></select></label>
+        </div>
+        <label class="check" id="ocpRow" for="ocp"><input type="checkbox" id="ocp"> Taking estrogen-containing birth control</label>
+        <label class="check" for="prior"><input type="checkbox" id="prior"> I have had a blood clot (DVT or PE) before</label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Training</legend>
+        <div class="grid2">
+          <label for="sport">Main sport<select id="sport">
+            <option value="running">Running</option><option value="triathlon">Triathlon</option>
+            <option value="cycling">Cycling</option><option value="swimming">Swimming</option><option value="mixed">Mixed / gym</option></select></label>
+          <label for="inten">Typical effort<select id="inten">
+            <option value="0.5">Easy (can chat freely)</option><option value="0.62">Moderate</option>
+            <option value="0.75" selected>Hard</option><option value="0.85">Very hard / race pace</option></select></label>
+          <label for="spw">Sessions per week<input type="number" id="spw" min="0" max="14" step="0.5" value="6"></label>
+          <label for="dur">Hours per session<input type="number" id="dur" min="0.1" max="8" step="0.25" value="1.5"></label>
+          <label for="races">Long races or events per year<input type="number" id="races" min="0" max="30" value="6"></label>
+          <label for="raceH">Hours per race<input type="number" id="raceH" min="0.5" max="17" step="0.5" value="4"></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Recovery habits</legend>
+        <label for="hydr">Share of sweat you replace by drinking during exercise
+          <div class="range"><input type="range" id="hydr" min="0" max="100" step="5" value="60"><output id="hydrOut" for="hydr">60%</output></div>
+        </label>
+        <div class="grid2">
+          <label for="sitAfter">Hours sitting still after a typical workout<input type="number" id="sitAfter" min="0" max="12" step="0.5" value="1"></label>
+          <label for="raceSit">Hours sitting after a race <span class="hint">include travel home</span><input type="number" id="raceSit" min="0" max="24" step="0.5" value="5"></label>
+        </div>
+        <label class="check" for="ar"><input type="checkbox" id="ar"> I do active recovery (walking, easy spin) after hard sessions</label>
+      </fieldset>
+    </form>
+
+    <section class="panel result" id="result" aria-live="polite">
+      <div class="blocked">
+        <div class="note crit"><strong>This model doesn't apply to you.</strong>A previous clot changes your risk far more than training does, and the model doesn't include it. Please talk to your doctor about your risk and about exercise.</div>
+      </div>
+      <div class="readout">
+        <div class="kicker">Chance of a blood clot in the next 12 months</div>
+        <div class="big"><span class="num" id="num">–</span><span class="unit">in 100,000 people like you</span></div>
+        <p class="sub">About <b id="oneIn">–</b>. Likely range <b id="range">–</b>, given the model's uncertainty. <span class="pill" id="fitPill">–</span></p>
+      </div>
+      <div class="readout">
+        <h3>Compared with the same person training differently</h3>
+        <div class="bars" id="bars"></div>
+      </div>
+      <div class="readout">
+        <h3 id="shareTitle">Where your exercise-related risk comes from</h3>
+        <div class="bars" id="shares"></div>
+      </div>
+      <div class="readout">
+        <h3>What would lower it</h3>
+        <ul class="levers" id="levers"></ul>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <p><b>What the number means.</b> It is the model's estimate of the chance of developing a first clot within a year. It is not the chance that you have a clot now. Most of the estimate comes from age, weight, genes and hormones. Training adds or removes a part of it through four routes: dehydration thickening the blood, clotting activated by hard efforts, sitting still afterward, and small injuries to vein walls from repetitive movement.</p>
+    <p><b>How it is calculated.</b> Your year is simulated workout by workout, then repeated 400 times with different values for the uncertain inputs. The large number uses the model's central assumptions. The range covers 90% of the repeats. The full method, inputs and their sources are in the <a href="https://claude.ai/artifact/2cDn2jVcLXR9S2TNeaHTUF" style="color:var(--accent)">model write-up</a>.</p>
+    <p><b>Model version 2</b> (November 2026): clotting timing and effect size are fitted to published marathon blood-test studies, and fitness protection is calibrated to 14 population cohort studies. The vein-wall microtrauma effect is still an assumption. Details are in the <a href="https://claude.ai/artifact/Nkq5LhZ1PpqopCSdRgDfM4" style="color:var(--accent)">model addendum</a>.</p>
+    <p>Everything runs in your browser. Nothing you enter is sent anywhere or saved.</p>
+  </footer>
+</div>
+
+<script>
+// JavaScript port of vte_sim/model.py + params.PRIORS_V2 (calibrated v2, 2026-11-14).
+// Keep in sync with the Python model; test_parity.js checks they agree.
+
+const PRIORS = {
+  base_inc_30:   [0.6e-4, 1.0e-4, 1.5e-4],
+  rr_age_decade: [1.4, 1.7, 2.0],
+  rr_bmi_5:      [1.3, 1.5, 1.8],
+  rr_fvl:        [3.0, 4.5, 7.0],
+  rr_ocp:        [2.0, 3.0, 4.5],
+  rr_fitness:    [0.67, 0.78, 0.89],   // v2: calibrated to Kunutsor 2020
+  rr_fit_extra:  [0.85, 0.95, 1.00],   // v2: Wang 2024 dose-response flattens
+  k_pv:          [1.0, 1.6, 2.5],
+  beta_hct:      [0.019, 0.045, 0.14],
+  beta_coag:     [0.0, 0.71, 1.08],    // v2: derived from marker-VTE associations
+  fib_ratio:     [0.6, 0.9, 1.3],
+  tau_coag_h:    [12.7, 17.1, 21.8],   // v2: fitted to WSER / Prisco 1998
+  tau_fib_h:     [1.0, 3.0, 6.8],      // v2: tPA clears within a day
+  beta_stasis:   [0.05, 0.083, 0.12],
+  active_recov:  [0.3, 0.5, 0.7],
+  beta_micro:    [0.0, 0.35, 0.7],
+  tau_micro_d:   [1.0, 2.0, 4.0],
+  beta_syn:      [0.0, 0.3, 0.8],
+};
+const SPORT_REP = { running: 1.0, triathlon: 0.8, cycling: 0.6, mixed: 0.6, swimming: 0.35 };
+const REF_INTEN = 0.85, REF_DUR = 4.0;
+
+// --- random numbers (seeded, so results are stable for the same inputs) ---
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function normal(rng) { let u = 0; while (u === 0) u = rng(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rng()); }
+function triangular(rng, a, c, b) {
+  if (a >= b) return c;
+  const u = rng(), f = (c - a) / (b - a);
+  return u < f ? a + Math.sqrt(u * (b - a) * (c - a)) : b - Math.sqrt((1 - u) * (b - a) * (b - c));
+}
+function centralParams() { const p = {}; for (const k in PRIORS) p[k] = PRIORS[k][1]; return p; }
+function sampleParams(rng) { const p = {}; for (const k in PRIORS) p[k] = triangular(rng, ...PRIORS[k]); return p; }
+
+// --- physiology (same equations as model.py) ---
+function coagShape(p) {
+  const tc = p.tau_coag_h, tf = p.tau_fib_h, r = p.fib_ratio;
+  const tstar = r > 1 ? Math.max(0, Math.log(r) / (1 / tf - 1 / tc)) : 0;
+  return tc * Math.exp(-tstar / tc) - r * tf * Math.exp(-tstar / tf);
+}
+const COAG_REF = coagShape(centralParams());
+
+function fitnessLevel(person) {
+  const weeklyHours = person.spw * person.dur + (person.races * person.raceH) / 52;
+  return weeklyHours < 1 ? 0 : weeklyHours < 5 ? 1 : 2;
+}
+
+// Simulate one year for one person under parameter set p.
+// off: set of pathways to switch off ("hct","coag","stasis","micro","syn").
+function simulateYear(person, p, rng, off = new Set()) {
+  const nS = Math.max(Math.round(52 * person.spw), 1);
+  const races = Math.min(person.races, nS);
+  const raceIdx = new Set();
+  if (races > 0) for (let j = 1; j <= races; j++) raceIdx.add(Math.floor(j * (nS - 1) / (races + 1)));
+  const dt = 365 / nS, decay = Math.exp(-dt / p.tau_micro_d);
+  const coagScale = Math.max(coagShape(p), 0) / COAG_REF;
+  const rep = SPORT_REP[person.sport] ?? 0.6;
+  const hct0 = person.hct0;
+  let micro = 0, excess = 0;
+  const contrib = { hct: 0, coag: 0, stasis: 0, micro: 0, syn: 0 };
+
+  for (let k = 0; k < nS; k++) {
+    let inten, dur, immob;
+    if (raceIdx.has(k)) {
+      inten = 0.85;
+      dur = person.raceH * (0.7 + 0.8 * rng());
+      immob = Math.exp(Math.log(Math.max(person.raceSit, 0.1)) + 0.5 * normal(rng));
+    } else {
+      inten = Math.min(Math.max(person.inten + (rng() - 0.5) * 0.15, 0.2), 1.0);
+      dur = person.dur * (0.67 + 0.66 * rng());
+      immob = Math.exp(Math.log(Math.max(person.sitAfter, 0.1)) + 0.6 * normal(rng));
+    }
+    if (person.activeRecovery) immob *= 1 - p.active_recov;
+    const stasis = Math.max(immob - 1, 0);
+
+    const sweat = (0.2 + 1.4 * inten) * dur;
+    const bml = Math.min(Math.max(sweat * (1 - person.hydr) / person.mass * 100, 0), 8);
+    const dpv = Math.min(Math.max(p.k_pv * bml / 100, 0), 0.35);
+    const dhct = 100 * hct0 / (hct0 + (100 - hct0) * (1 - dpv)) - hct0;
+    const cnet = Math.pow(inten / REF_INTEN, 2) * (dur / REF_DUR) * coagScale;
+    const load = rep * inten * dur / (REF_INTEN * REF_DUR);
+    micro = micro * decay + load;
+
+    const hyper = (dhct / 2 + cnet) / 2;
+    const t = {
+      hct: p.beta_hct * dhct,
+      coag: p.beta_coag * cnet,
+      stasis: p.beta_stasis * stasis,
+      micro: p.beta_micro * micro,
+      syn: p.beta_syn * Math.cbrt(Math.max(hyper, 0) * (stasis / 4) * micro),
+    };
+    let lr = 0;
+    for (const key in t) if (!off.has(key)) { lr += t[key]; contrib[key] += t[key]; }
+    excess += Math.expm1(lr);
+  }
+
+  let prr = Math.pow(p.rr_age_decade, (person.age - 30) / 10);
+  prr *= Math.pow(p.rr_bmi_5, Math.max(person.bmi - 25, 0) / 5);
+  if (person.fvl) prr *= p.rr_fvl;
+  if (person.ocp) prr *= p.rr_ocp;
+  const fit = fitnessLevel(person);
+  if (fit >= 1) prr *= p.rr_fitness;
+  if (fit >= 2) prr *= p.rr_fit_extra;
+  const hDay = p.base_inc_30 / 365;
+  return { risk: -Math.expm1(-hDay * prr * (365 + excess)), contrib };
+}
+
+// Full calculator: central estimate + uncertainty band + pathway breakdown.
+function calculate(person, { draws = 400, seed = 12345 } = {}) {
+  const rngC = mulberry32(seed);
+  const reps = 20;
+  const avg = (fn) => { let s = 0; for (let i = 0; i < reps; i++) s += fn(); return s / reps; };
+  const pc = centralParams();
+  const central = avg(() => simulateYear(person, pc, rngC).risk);
+  const allOff = new Set(["hct", "coag", "stasis", "micro", "syn"]);
+  const noExercise = avg(() => simulateYear(person, pc, rngC, allOff).risk);
+  const share = {};
+  const excess = central - noExercise;
+  for (const k of allOff) {
+    const without = avg(() => simulateYear(person, pc, rngC, new Set([k])).risk);
+    share[k] = excess > 0 ? (central - without) / excess : 0;
+  }
+  const rngU = mulberry32(seed + 1);
+  const samples = [];
+  for (let i = 0; i < draws; i++) samples.push(simulateYear(person, sampleParams(rngU), rngU).risk);
+  samples.sort((a, b) => a - b);
+  const q = (f) => samples[Math.min(samples.length - 1, Math.floor(f * samples.length))];
+  return { central, low: q(0.05), median: q(0.5), high: q(0.95), noExercise, share, fitness: fitnessLevel(person) };
+}
+
+if (typeof module !== "undefined") module.exports = { calculate, simulateYear, centralParams, mulberry32, fitnessLevel };
+
+
+const $ = (id) => document.getElementById(id);
+const IDS = ["age","sex","units","weight","height","hct","fvl","ocp","prior","sport","inten","spw","dur","races","raceH","hydr","sitAfter","raceSit","ar"];
+const num = (id, d) => { const v = parseFloat($(id).value); return Number.isFinite(v) ? v : d; };
+const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
+
+function readPerson() {
+  const metric = $("units").value === "metric";
+  const sex = $("sex").value;
+  const w = num("weight", metric ? 72 : 160), h = num("height", metric ? 177 : 70);
+  const kg = clamp(metric ? w : w * 0.4536, 30, 250);
+  const m = clamp(metric ? h / 100 : h * 0.0254, 1.2, 2.3);
+  const hctIn = parseFloat($("hct").value);
+  return {
+    age: clamp(num("age", 35), 16, 80), sex, mass: kg, bmi: kg / (m * m),
+    hct0: Number.isFinite(hctIn) ? clamp(hctIn, 30, 60) : (sex === "female" ? 40 : 44),
+    fvl: $("fvl").value === "yes", ocp: sex === "female" && $("ocp").checked,
+    sport: $("sport").value, inten: parseFloat($("inten").value),
+    spw: clamp(num("spw", 0), 0, 14), dur: clamp(num("dur", 1), 0.1, 8),
+    races: Math.round(clamp(num("races", 0), 0, 30)), raceH: clamp(num("raceH", 4), 0.5, 17),
+    hydr: clamp(num("hydr", 60) / 100, 0, 0.98), sitAfter: clamp(num("sitAfter", 1), 0, 12),
+    raceSit: clamp(num("raceSit", 5), 0, 24), activeRecovery: $("ar").checked,
+  };
+}
+
+function centralRisk(person, seed) {
+  const p = centralParams(), rng = mulberry32(seed); let s = 0;
+  for (let i = 0; i < 20; i++) s += simulateYear(person, p, rng).risk;
+  return s / 20;
+}
+const per100k = (r) => r * 1e5;
+const fmt = (x) => x >= 10 ? x.toFixed(0) : x.toFixed(1);
+const oneIn = (r) => "1 in " + Math.round(1 / r).toLocaleString("en-US");
+
+function bar(label, value, max, cls = "") {
+  const pct = max > 0 ? Math.max(1.5, 100 * value / max) : 0;
+  return `<div class="bar ${cls}"><span>${label}</span><div class="track"><div class="fill" style="width:${pct}%"></div></div><span class="val">${fmt(value)}</span></div>`;
+}
+
+const PATH_NAMES = { micro: "Vein-wall microtrauma", coag: "Clotting activation", syn: "All factors together", stasis: "Sitting still after", hct: "Dehydration" };
+
+function render() {
+  const sex = $("sex").value;
+  $("ocpRow").style.display = sex === "female" ? "flex" : "none";
+  const metric = $("units").value === "metric";
+  $("weightLabel").textContent = metric ? "Weight (kg)" : "Weight (lb)";
+  $("heightLabel").textContent = metric ? "Height (cm)" : "Height (inches)";
+  $("hydrOut").textContent = $("hydr").value + "%";
+  $("result").classList.toggle("is-blocked", $("prior").checked);
+  if ($("prior").checked) return;
+
+  const person = readPerson();
+  const r = calculate(person);
+  $("num").textContent = fmt(per100k(r.central));
+  $("oneIn").textContent = oneIn(r.central);
+  $("range").textContent = `${fmt(per100k(r.low))}–${fmt(per100k(r.high))} in 100,000`;
+  $("fitPill").textContent = ["Counted as inactive", "Counted as regularly active", "Counted as high-volume training"][r.fitness];
+
+  const moderate = { ...person, spw: 3, dur: 0.75, inten: 0.62, races: 0, sport: "mixed" };
+  const inactive = { ...person, spw: 0.5, dur: 0.5, inten: 0.5, races: 0, sport: "mixed" };
+  const comps = [
+    ["You", r.central, "you"],
+    ["3 × 45 min, moderate", centralRisk(moderate, 21)],
+    ["Mostly inactive", centralRisk(inactive, 22)],
+  ];
+  const maxC = Math.max(...comps.map((c) => c[1]));
+  $("bars").innerHTML = comps.map(([l, v, c]) => bar(l, per100k(v), per100k(maxC), c)).join("");
+
+  const extra = r.central - r.noExercise;
+  if (extra > 1e-8) {
+    $("shareTitle").textContent = `Where your exercise-related risk comes from (+${fmt(per100k(extra))} in 100,000)`;
+    const rows = Object.entries(r.share).sort((a, b) => b[1] - a[1]);
+    $("shares").innerHTML = rows.map(([k, v]) => bar(PATH_NAMES[k], Math.max(v, 0) * 100, 100).replace(/<span class="val">([^<]*)<\/span>/, `<span class="val">${Math.round(Math.max(v, 0) * 100)}%</span>`)).join("")
+      + `<p class="sub">Shares overlap, so they can add up to more than 100%.</p>`;
+  } else {
+    $("shareTitle").textContent = "Where your exercise-related risk comes from";
+    $("shares").innerHTML = `<p class="sub">Your training adds almost no extra risk in this model.</p>`;
+  }
+
+  const base = r.central, levers = [];
+  const tryLever = (label, changed) => {
+    const v = centralRisk(changed, 30);
+    const pct = 100 * (1 - v / base);
+    if (pct >= 0.5) levers.push([label, pct]);
+  };
+  if (person.hydr < 0.85) tryLever("Replace about 90% of sweat by drinking", { ...person, hydr: 0.9 });
+  if (!person.activeRecovery) tryLever("Do active recovery after hard sessions", { ...person, activeRecovery: true });
+  if (person.races > 0 && person.raceSit > 2) tryLever("Break up sitting after races (under 2 h at a time)", { ...person, raceSit: 1.5 });
+  if (person.sitAfter > 1.5) tryLever("Move within an hour after workouts", { ...person, sitAfter: 1 });
+  if (person.spw * person.dur > 6) tryLever("Cut weekly training volume by a quarter", { ...person, dur: person.dur * 0.75 });
+  levers.sort((a, b) => b[1] - a[1]);
+  $("levers").innerHTML = levers.length
+    ? levers.map(([l, p]) => `<li><span>${l}</span><span>−${p.toFixed(0)}%</span></li>`).join("")
+    : `<li><span>None of the habit changes the model includes would lower your estimate much.</span><span></span></li>`;
+}
+
+let timer;
+const schedule = () => { clearTimeout(timer); timer = setTimeout(render, 120); };
+IDS.forEach((id) => { $(id).addEventListener("input", schedule); $(id).addEventListener("change", schedule); });
+$("units").addEventListener("change", () => {
+  const metric = $("units").value === "metric";
+  const w = parseFloat($("weight").value), h = parseFloat($("height").value);
+  if (Number.isFinite(w)) $("weight").value = metric ? Math.round(w * 0.4536) : Math.round(w / 0.4536);
+  if (Number.isFinite(h)) $("height").value = metric ? Math.round(h * 2.54) : Math.round(h / 2.54);
+  render();
+});
+$("form").addEventListener("submit", (e) => e.preventDefault());
+render();
+</script>
+</body>
+</html>

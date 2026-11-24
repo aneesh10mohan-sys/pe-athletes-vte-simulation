@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Exercise-Associated VTE Risk: A Mechanistic Simulation"
+authors:
+  - family-names: Mohan
+    given-names: Aneesh A.
+version: 2.0.0
+date-released: 2026-11-24
+license: MIT
+repository-code: "https://github.com/aneesh10mohan-sys/pe-athletes-vte-simulation"

@@ -1,0 +1,11 @@
+extra-fitness RR 0.50: break-even acute strength = nanx central
+extra-fitness RR 0.55: break-even acute strength = 1.48x central
+extra-fitness RR 0.60: break-even acute strength = 1.32x central
+extra-fitness RR 0.65: break-even acute strength = 1.15x central
+extra-fitness RR 0.70: break-even acute strength = 0.98x central
+extra-fitness RR 0.75: break-even acute strength = 0.81x central
+extra-fitness RR 0.80: break-even acute strength = 0.65x central
+extra-fitness RR 0.85: break-even acute strength = 0.49x central
+extra-fitness RR 0.90: break-even acute strength = 0.33x central
+extra-fitness RR 0.95: break-even acute strength = 0.18x central
+extra-fitness RR 1.00: break-even acute strength = 0.03x central
