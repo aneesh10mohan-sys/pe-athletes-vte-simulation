@@ -41,6 +41,16 @@ python threshold.py                                                          # b
 
 Seeds are fixed, so results are reproducible.
 
+## Integrity experiments
+
+`experiments.py` reruns the calibrated model with one thing changed at a time (seeds, population size, each mechanism switched off or strengthened, and sanity checks with a known right answer) and saves a comparison table to `experiments/experiments_summary.csv`.
+
+```bash
+python experiments.py                     # all 15 experiments, about 5 minutes
+python experiments.py --reps 30 --n 1000  # quick version, about 1 minute
+python experiments.py --only no_micro all_acute_off
+```
+
 ## Files
 
 - `params.py`: parameter ranges and sources (v1 original, v2 calibrated), groups, prevention scenarios
@@ -49,6 +59,7 @@ Seeds are fixed, so results are reproducible.
 - `calibrate.py`: biomarker fit and cohort calibration
 - `threshold.py`: break-even analysis
 - `figures.py`: figures
+- `experiments.py`: integrity experiments (one change at a time)
 - `results/`, `results_v2/`: outputs for v1 and v2 priors
 - `web_calculator/`: browser version of the model for a single person (`index.html`), with a parity test against the Python model
 
